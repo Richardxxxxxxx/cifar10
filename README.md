@@ -6,7 +6,7 @@ This is to using inception to classify cifar10 dataset
 
 #recover image from cifar10 batch file, edit three valiables
 #base_path = base path where to store data_batch* and test_batch
-#train_dir = path to store recover taringning data
+#train_dir = path to store recover training data
 #validate_dir = path to store recover testing data
 
 python convert.py
