@@ -1,6 +1,6 @@
 # cifar10
 
-This is to using inception to classify cifar10 dataset
+This is to use inception model to classify cifar10 dataset
 
 ```shell
 
