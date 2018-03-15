@@ -49,4 +49,4 @@ python imagenet_distributed_train.py \
 
 ```
 
-futher details refer to https://github.com/tensorflow/models/tree/master/research/inception
+for more details please refer to Original Source:https://github.com/tensorflow/models/tree/master/research/inception
