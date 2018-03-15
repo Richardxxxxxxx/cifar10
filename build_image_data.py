@@ -13,35 +13,45 @@
 # limitations under the License.
 # ==============================================================================
 """Converts image data to TFRecords file format with Example protos.
+
 The image data set is expected to reside in JPEG files located in the
 following directory structure.
+
   data_dir/label_0/image0.jpeg
   data_dir/label_0/image1.jpg
   ...
   data_dir/label_1/weird-image.jpeg
   data_dir/label_1/my-image.jpeg
   ...
+
 where the sub-directory is the unique label associated with these images.
+
 This TensorFlow script converts the training and evaluation data into
 a sharded data set consisting of TFRecord files
+
   train_directory/train-00000-of-01024
   train_directory/train-00001-of-01024
   ...
   train_directory/train-01023-of-01024
+
 and
+
   validation_directory/validation-00000-of-00128
   validation_directory/validation-00001-of-00128
   ...
   validation_directory/validation-00127-of-00128
+
 where we have selected 1024 and 128 shards for each data set. Each record
 within the TFRecord file is a serialized Example proto. The Example proto
 contains the following fields:
+
   image/encoded: string containing JPEG encoded image in RGB colorspace
   image/height: integer, image height in pixels
   image/width: integer, image width in pixels
   image/colorspace: string, specifying the colorspace, always 'RGB'
   image/channels: integer, specifying the number of channels, always 3
   image/format: string, specifying the format, always 'JPEG'
+
   image/filename: string containing the basename of the image file
             e.g. 'n01440764_10026.JPEG' or 'ILSVRC2012_val_00000293.JPEG'
   image/class/label: integer specifying the index in a classification layer.
@@ -49,6 +59,7 @@ contains the following fields:
     the background class.
   image/class/text: string specifying the human-readable version of the label
     e.g. 'dog'
+
 If your data set involves bounding boxes, please look at build_imagenet_data.py.
 """
 from __future__ import absolute_import
@@ -64,17 +75,11 @@ import threading
 import numpy as np
 import tensorflow as tf
 
-
-train_directory='cifar-10-batches-py/train'
-validation_directory='cifar-10-batches-py/validate'
-output_directory='processed-data'
-labels_file='label'
-
-tf.app.flags.DEFINE_string('train_directory', train_directory,
+tf.app.flags.DEFINE_string('train_directory', '/tmp/',
                            'Training data directory')
-tf.app.flags.DEFINE_string('validation_directory', validation_directory,
+tf.app.flags.DEFINE_string('validation_directory', '/tmp/',
                            'Validation data directory')
-tf.app.flags.DEFINE_string('output_directory', output_directory,
+tf.app.flags.DEFINE_string('output_directory', '/tmp/',
                            'Output data directory')
 
 tf.app.flags.DEFINE_integer('train_shards', 2,
@@ -92,7 +97,7 @@ tf.app.flags.DEFINE_integer('num_threads', 2,
 #   flower
 # where each line corresponds to a label. We map each label contained in
 # the file to an integer corresponding to the line number starting from 0.
-tf.app.flags.DEFINE_string('labels_file', labels_file, 'Labels file')
+tf.app.flags.DEFINE_string('labels_file', '', 'Labels file')
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -112,6 +117,7 @@ def _bytes_feature(value):
 
 def _convert_to_example(filename, image_buffer, label, text, height, width):
   """Build an Example proto for an example.
+
   Args:
     filename: string, path to an image file, e.g., '/path/to/example.JPG'
     image_buffer: string, JPEG encoding of RGB image
@@ -170,8 +176,10 @@ class ImageCoder(object):
 
 def _is_png(filename):
   """Determine if a file contains a PNG format image.
+
   Args:
     filename: string, path of the image file.
+
   Returns:
     boolean indicating if the image is a PNG.
   """
@@ -180,6 +188,7 @@ def _is_png(filename):
 
 def _process_image(filename, coder):
   """Process a single image file.
+
   Args:
     filename: string, path to an image file e.g., '/path/to/example.JPG'.
     coder: instance of ImageCoder to provide TensorFlow image coding utils.
@@ -212,6 +221,7 @@ def _process_image(filename, coder):
 def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
                                texts, labels, num_shards):
   """Processes and saves list of images as TFRecord in 1 thread.
+
   Args:
     coder: instance of ImageCoder to provide TensorFlow image coding utils.
     thread_index: integer, unique batch to run index is within [0, len(ranges)).
@@ -280,6 +290,7 @@ def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
 
 def _process_image_files(name, filenames, texts, labels, num_shards):
   """Process and save list of images as TFRecord of Example protos.
+
   Args:
     name: string, unique identifier specifying the data set
     filenames: list of strings; each string is a path to an image file
@@ -323,14 +334,20 @@ def _process_image_files(name, filenames, texts, labels, num_shards):
 
 def _find_image_files(data_dir, labels_file):
   """Build a list of all images files and labels in the data set.
+
   Args:
     data_dir: string, path to the root directory of images.
+
       Assumes that the image data set resides in JPEG files located in
       the following directory structure.
+
         data_dir/dog/another-image.JPEG
         data_dir/dog/my-image.jpg
+
       where 'dog' is the label associated with these images.
+
     labels_file: string, path to the labels file.
+
       The list of valid labels are held in this file. Assumes that the file
       contains entries as such:
         dog
@@ -339,6 +356,7 @@ def _find_image_files(data_dir, labels_file):
       where each line corresponds to a label. We map each label contained in
       the file to an integer starting with the integer 0 corresponding to the
       label contained in the first line.
+
   Returns:
     filenames: list of strings; each string is a path to an image file.
     texts: list of strings; each string is the class, e.g. 'dog'
@@ -387,6 +405,7 @@ def _find_image_files(data_dir, labels_file):
 
 def _process_dataset(name, directory, num_shards, labels_file):
   """Process a complete data set and save it as a TFRecord.
+
   Args:
     name: string, unique identifier specifying the data set.
     directory: string, root path to the data set.
@@ -414,4 +433,3 @@ def main(unused_argv):
 
 if __name__ == '__main__':
   tf.app.run()
-
