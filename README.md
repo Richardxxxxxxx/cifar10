@@ -26,7 +26,7 @@ python build_image_data.py \
 
 
 #running ps node
-imagenet_distributed_train \
+python imagenet_distributed_train.py \
 --job_name='ps' \
 --task_id=0 \
 --ps_hosts='127.0.0.1:2222' \
